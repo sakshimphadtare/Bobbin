@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %} {# ✅ Required for `mul` filter #}
+
+{% block title %}Your Cart - Bobbin{% endblock %}
+
+{% block extra_head %}
+<style>
+  .btn-bobbin {
+    background-color: rgb(3, 59, 47);
+    color: white;
+    border-radius: 0;
+    padding: 6px 16px;
+    border: none;
+    transition: background 0.3s ease;
+  }
+
+  .btn-bobbin:hover {
+    background-color: rgb(2, 45, 35);
+  }
+
+  .empty-cart-message {
+    text-align: center;
+    margin-top: 50px;
+  }
+
+  .popup-message {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    color: black;
+    border: 1px solid #ccc;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    z-index: 9999;
+    display: none;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Your Cart</h2>
+
+  {% if cart_items %}
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Size</th>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Subtotal</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in cart_items %}
+        <tr>
+          <td>
+            {{ item.product.name }}<br>
+            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" style="width: 80px;">
+          </td>
+          <td>{{ item.size|default:"—" }}</td>
+          <td>
+            <form method="POST" action="{% url 'decrease_quantity' item.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-secondary">-</button>
+            </form>
+            {{ item.quantity }}
+            <form method="POST" action="{% url 'increase_quantity' item.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-secondary">+</button>
+            </form>
+          </td>
+          <td>₹{{ item.product.price }}</td>
+          <td>₹{{ item.product.price|mul:item.quantity|floatformat:2 }}</td>
+          <td>
+            <form method="POST" action="{% url 'remove_from_cart' item.id %}">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-danger">Remove</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h4 class="mt-4">Total: ₹{{ total_price|floatformat:2 }}</h4>
+
+    <a href="#" class="btn btn-bobbin mt-3">Proceed to Checkout</a>
+  {% else %}
+    <div class="empty-cart-message">
+      <p>Your cart is empty.</p>
+      <a href="{% url 'product_list' %}" class="btn btn-bobbin mt-3">Browse Products</a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Popup Message -->
+<div id="popupMessage" class="popup-message">
+  Item added to cart successfully!
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Show popup message if added param exists
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('added') === '1') {
+    const popup = document.getElementById('popupMessage');
+    if (popup) {
+      popup.style.display = 'block';
+      setTimeout(() => {
+        popup.style.display = 'none';
+      }, 1500);
+    }
+  }
+
+  // AJAX cart item removal
+  document.querySelectorAll('form[action^="/remove-from-cart/"]').forEach(form => {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const url = this.action;
+      const csrfToken = this.querySelector('input[name=csrfmiddlewaretoken]').value;
+      const row = this.closest('tr');
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          row.remove();
+        } else {
+          alert(data.message || 'Something went wrong.');
+        }
+      })
+      .catch(() => {
+        alert('Error removing item from cart.');
+      });
+    });
+  });
+</script>
+{% endblock %}

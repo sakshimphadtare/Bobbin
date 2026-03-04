@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register - Bobbin{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-lg border-0 p-4 rounded-4 bg-white">
+                <h2 class="text-center mb-4 fw-bold" style="font-family: 'Playfair Display', serif;">Create Your Bobbin Account</h2>
+
+                <!-- ✅ Flash Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- ✅ Registration Form -->
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-dark w-100 mt-3">Register</button>
+                </form>
+
+                <p class="text-center mt-3">
+                    Already have an account?
+                    <a href="{% url 'login' %}" class="text-decoration-none">Login here</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_head %}
+<style>
+  body, .container-fluid { margin: 0; padding: 0; }
+
+  .gucci-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    width: 100vw;
+    padding: 0;
+    margin: 0;
+  }
+
+  .gucci-card {
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    overflow: hidden;
+  }
+
+  .gucci-card img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4/5;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+    display: block;
+  }
+
+  .gucci-card:hover img {
+    transform: scale(1.03);
+  }
+
+  .wish {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255,255,255,0.85);
+    padding: 8px;
+    border-radius: 50%;
+    z-index: 2;
+    transition: background 0.3s;
+    border: none;
+  }
+
+  .wish:hover {
+    background: rgba(255,255,255,1);
+  }
+
+  .wish i.bi-heart {
+    color: black;
+  }
+
+  .wish i.bi-heart-fill {
+    color: red !important;
+  }
+
+  .overlay {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 12px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .gucci-card:hover .overlay {
+    opacity: 1;
+  }
+
+  .appear {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+
+  @media (max-width: 768px) {
+    .gucci-grid {
+      gap: 8px;
+    }
+  }
+
+  /* 🔥 Filter button + sidebar */
+  .advanced-filters-container {
+    margin: 20px auto;
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 20px;
+  }
+  #filterSidebar {
+    position: fixed;
+    top: 0;
+    right: -320px;
+    width: 300px;
+    height: 100%;
+    background: #fff;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.3);
+    z-index: 9998;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+  }
+  #filterSidebar.active { right: 0; }
+  #filterOverlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4);
+    z-index: 9997;
+    display: none;
+  }
+  .filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .close-sidebar {
+    background: none;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+  }
+  .filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .filter-option {
+    padding: 8px 12px;
+    background: #f2f2f2;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    user-select: none;
+  }
+  .filter-option.active {
+    background: rgb(3,59,47);
+    color: #fff;
+    border-color: rgb(3,59,47);
+  }
+  .apply-btn {
+    margin-top: auto;
+    padding: 10px;
+    background: rgb(3,59,47);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  /* ✅ Toast styling (same as product_list) */
+  #feedbackToast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 6px;
+    font-size: 14px;
+    z-index: 99999;
+    display: none;
+    animation: fadeInOut 3s forwards;
+  }
+  @keyframes fadeInOut {
+    0% {opacity:0;transform:translateY(20px);}
+    10% {opacity:1;transform:translateY(0);}
+    80% {opacity:1;transform:translateY(0);}
+    100% {opacity:0;transform:translateY(20px);}
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ✅ Filter button -->
+<div class="advanced-filters-container">
+  <button id="filterToggle" class="btn-bobbin" style="display:flex;align-items:center;gap:6px;">
+    <i class="bi bi-sliders"></i>
+  </button>
+</div>
+
+<div class="gucci-grid" id="productGrid">
+  {% for product in products %}
+    <div class="gucci-card"
+         data-fabric="{{ product.material|default:''|lower }}"
+         data-size="{{ product.size|default:''|upper }}"
+         data-price="{{ product.price }}">
+      {% if user.is_authenticated %}
+        <button
+          class="wish"
+          data-url="{% url 'toggle_wishlist' product.id %}"
+          data-product="{{ product.id }}"
+          title="Add to Wishlist"
+        >
+          <i class="bi bi-heart{% if product.id in wishlist_products %}-fill{% endif %}"></i>
+        </button>
+      {% endif %}
+      <a href="{% url 'product_detail' product.id %}">
+        {% if product.image1 %}
+          <img src="{{ product.image1.url }}" alt="{{ product.name }}">
+        {% else %}
+          <img src="{% static 'images/no-image.png' %}" alt="No image">
+        {% endif %}
+        <div class="overlay">{{ product.name }}</div>
+      </a>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- ✅ Sidebar -->
+<div id="filterSidebar">
+  <div class="filter-header">
+    <h4 style="margin:0;">Filters</h4>
+    <button class="close-sidebar" id="closeSidebar">&times;</button>
+  </div>
+
+  <h5>Fabric</h5>
+  <div class="filter-group" id="fabricGroup">
+    <div class="filter-option" data-value="">All</div>
+    <div class="filter-option" data-value="cotton">Cotton</div>
+    <div class="filter-option" data-value="linen">Linen</div>
+    <div class="filter-option" data-value="denim">Denim</div>
+    <div class="filter-option" data-value="flannel">Flannel</div>
+    <div class="filter-option" data-value="polyester">Polyester</div>
+    <div class="filter-option" data-value="rayon / viscose">Rayon / Viscose</div>
+    <div class="filter-option" data-value="blends">Blends</div>
+    <div class="filter-option" data-value="silk">Silk</div>
+  </div>
+
+  <h5>Size</h5>
+  <div class="filter-group" id="sizeGroup">
+    <div class="filter-option" data-value="">All</div>
+    <div class="filter-option" data-value="XS">XS</div>
+    <div class="filter-option" data-value="S">S</div>
+    <div class="filter-option" data-value="M">M</div>
+    <div class="filter-option" data-value="L">L</div>
+    <div class="filter-option" data-value="XL">XL</div>
+    <div class="filter-option" data-value="XXL">XXL</div>
+  </div>
+
+  <h5>Sort by Price</h5>
+  <div class="filter-group" id="priceGroup">
+    <div class="filter-option" data-value="">None</div>
+    <div class="filter-option" data-value="low-high">Low → High</div>
+    <div class="filter-option" data-value="high-low">High → Low</div>
+  </div>
+
+  <button class="apply-btn" id="applyFilters">Apply</button>
+</div>
+
+<div id="filterOverlay"></div>
+
+<!-- ✅ Toast container -->
+<div id="feedbackToast"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Sidebar toggle
+  const filterBtn = document.getElementById('filterToggle');
+  const sidebar = document.getElementById('filterSidebar');
+  const overlay = document.getElementById('filterOverlay');
+  const closeBtn = document.getElementById('closeSidebar');
+  filterBtn.addEventListener('click', () => { sidebar.classList.add('active'); overlay.style.display = 'block'; });
+  overlay.addEventListener('click', closeSidebar);
+  closeBtn.addEventListener('click', closeSidebar);
+  function closeSidebar() { sidebar.classList.remove('active'); overlay.style.display = 'none'; }
+
+  // ✅ Toast logic (same as product_list.html)
+  function showToast(message) {
+    const toast = document.getElementById('feedbackToast');
+    toast.textContent = message;
+    toast.style.display = 'block';
+    toast.style.animation = 'none';
+    void toast.offsetWidth;
+    toast.style.animation = 'fadeInOut 3s forwards';
+    setTimeout(() => { toast.style.display = 'none'; }, 3000);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Animate product cards
+    document.querySelectorAll(".gucci-card").forEach((card, i) => {
+      setTimeout(() => card.classList.add("appear"), i * 50);
+    });
+
+    // Wishlist toggle
+    document.querySelectorAll('.wish').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const url = this.dataset.url;
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        }).then(res => res.json()).then(data => {
+          if (data.status === 'added') {
+            this.querySelector('i').classList.remove('bi-heart');
+            this.querySelector('i').classList.add('bi-heart-fill');
+            showToast('Added to wishlist!');
+          } else if (data.status === 'removed') {
+            this.querySelector('i').classList.remove('bi-heart-fill');
+            this.querySelector('i').classList.add('bi-heart');
+            showToast('Removed from wishlist!');
+          }
+        });
+      });
+    });
+  });
+</script>
+{% endblock %}

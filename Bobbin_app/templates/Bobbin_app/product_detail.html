@@ -1,0 +1,621 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Bobbin{% endblock %}
+
+{% block extra_head %}
+<style>
+  .detail-wrapper {
+    max-width: 1400px;
+    margin: 50px auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 60px;
+    padding: 0 40px;
+  }
+
+  /* Left Section */
+  .image-gallery {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    flex: 1.2;
+    position: relative;
+  }
+
+  .thumbnail-vertical-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .thumbnail-vertical {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .thumbnail-vertical.active {
+    border: 2px solid rgb(3,59,47);
+  }
+
+  .image-container {
+    width: 600px;
+    height: 700px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+  }
+
+  /* Wishlist Heart (Plain Outline, No Circle) */
+  .wishlist-heart {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+  }
+
+  .wishlist-heart:hover {
+    color: rgb(3,59,47);
+  }
+
+  .wishlist-heart.active {
+    color: red;
+  }
+
+  /* Share Button (single icon below heart) */
+  .share-button {
+    position: absolute;
+    top: 60px;
+    right: 18px;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+  }
+
+  .share-button:hover {
+    color: rgb(3,59,47);
+  }
+
+  /* Share Modal (bottom slide-up) */
+  .share-modal {
+    position: fixed;
+    left: 0;
+    bottom: -100%;
+    width: 100%;
+    background: #fff;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    box-shadow: 0 -6px 30px rgba(0,0,0,0.2);
+    transition: bottom 0.28s ease;
+    z-index: 2000;
+    padding: 18px 20px;
+    text-align: center;
+  }
+
+  .share-modal.active {
+    bottom: 0;
+  }
+
+  .share-modal h5 {
+    margin-bottom: 12px;
+    color: rgb(3,59,47);
+  }
+
+  .share-options {
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    align-items: center;
+  }
+
+  .share-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    color: #333;
+    font-size: 13px;
+  }
+
+  .share-option i {
+    font-size: 24px;
+    margin-bottom: 6px;
+    color: rgb(3,59,47);
+  }
+
+  .copy-link-btn {
+    margin-top: 12px;
+    display: inline-block;
+    color: rgb(3,59,47);
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  .close-share {
+    margin-top: 14px;
+    display: inline-block;
+    background: rgb(3,59,47);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  /* Right Section */
+  .product-details-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .product-info h2 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+  }
+
+  .price {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .product-meta div {
+    margin-bottom: 5px;
+  }
+
+  .size-options {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .size-btn {
+    padding: 6px 12px;
+    border: 1px solid #333;
+    background: none;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+
+  .size-btn.active {
+    background: rgb(3,59,47);
+    color: #fff;
+    border-color: rgb(3,59,47);
+  }
+
+  .btn-bobbin {
+    background-color: rgb(3,59,47);
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .popup-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    color: black;
+    border: 1px solid #ccc;
+    padding: 10px 20px;
+    z-index: 9999;
+    display: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    min-width: 200px;
+    text-align: center;
+  }
+
+  .description-section {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+  }
+
+  .reviews-section {
+    margin-top: 40px;
+    padding: 20px;
+    border-top: 1px solid #ddd;
+  }
+
+  .single-review {
+    background: #f9f9f9;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  .review-form textarea {
+    width: 100%;
+    min-height: 80px;
+    margin-bottom: 10px;
+    padding: 8px;
+  }
+
+  /* Fullscreen modal */
+  .fullscreen-modal {
+    display: none;
+    position: fixed;
+    z-index: 1050;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+    overflow: auto;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .fullscreen-modal img {
+    display: block;
+    width: auto;
+    height: 80vh;
+    max-width: 90%;
+    margin: auto;
+    object-fit: contain;
+    cursor: zoom-in;
+    transition: transform 0.3s ease;
+  }
+
+  .fullscreen-modal .close-btn {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1100;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-wrapper">
+  <!-- Left Side: Image Gallery -->
+  <div class="image-gallery">
+    <div class="thumbnail-vertical-wrapper">
+      {% for img in images %}
+        <img src="{{ img }}" alt="{{ product.name }}" class="thumbnail-vertical {% if forloop.first %}active{% endif %}">
+      {% empty %}
+        <img src="{% static 'images/no-image.png' %}" alt="No Image" class="thumbnail-vertical active">
+      {% endfor %}
+    </div>
+
+    <div class="image-container" id="mainImageContainer">
+      <div class="wishlist-heart {% if is_in_wishlist %}active{% endif %}" id="wishlistHeart" data-product-id="{{ product.id }}">
+        <i class="bi {% if is_in_wishlist %}bi-heart-fill{% else %}bi-heart{% endif %}"></i>
+      </div>
+      <div class="share-button" id="shareButton"><i class="bi bi-share"></i></div>
+      <img id="mainImage" src="{% if images %}{{ images.0 }}{% else %}{% static 'images/no-image.png' %}{% endif %}" alt="{{ product.name }}">
+    </div>
+  </div>
+
+  <!-- Right Side: Product Info + Description -->
+  <div class="product-details-right">
+    <div class="product-info">
+      <h2>{{ product.name }}</h2>
+      <div class="price">₹{{ product.price }}</div>
+
+      <div class="product-meta my-2">
+        {% if product.color %}<div><strong>Color:</strong> {{ product.color }}</div>{% endif %}
+        {% if product.brand %}<div><strong>Brand:</strong> {{ product.brand }}</div>{% endif %}
+        {% if product.category %}<div><strong>Style:</strong> {{ product.category }}</div>{% endif %}
+        <div><strong>Stock:</strong> {{ product.stock }}</div>
+      </div>
+
+      <label class="form-label mt-2"><strong>Select Your Size:</strong></label>
+      <div class="size-options">
+        {% for size in sizes %}
+          <button type="button" class="size-btn" data-size="{{ size }}">{{ size }}</button>
+        {% endfor %}
+      </div>
+
+      <button type="button" class="btn btn-link text-decoration-none" data-bs-toggle="modal" data-bs-target="#sizeGuideModal">
+        View Size Guide
+      </button>
+
+      <div class="mt-3 d-flex gap-2">
+        <button type="button" class="btn btn-bobbin" id="addToCartBtn" data-product-id="{{ product.id }}">Add to Cart</button>
+        <button type="button" class="btn btn-bobbin" id="buyNowButton">Buy Now</button>
+      </div>
+    </div>
+
+    <div class="description-section">
+      <h3>Description</h3>
+      <p>{{ product.description|default:"No description available." }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Share Modal -->
+<div id="shareModal" class="share-modal" role="dialog" aria-modal="true" aria-hidden="true">
+  <h5>Share this product</h5>
+  <div class="share-options">
+    <div class="share-option" id="shareWhatsApp"><i class="bi bi-whatsapp"></i>WhatsApp</div>
+    <div class="share-option" id="shareInstagram"><i class="bi bi-instagram"></i>Instagram</div>
+    <div class="share-option" id="shareFacebook"><i class="bi bi-facebook"></i>Facebook</div>
+    <div class="share-option" id="copyLink"><i class="bi bi-link-45deg"></i>Copy Link</div>
+  </div>
+  <button class="close-share" id="closeShareBtn">Close</button>
+</div>
+
+<!-- Reviews Section -->
+<div class="reviews-section">
+  <h3>Customer Reviews</h3>
+
+  {% if product.reviews.all %}
+    {% for review in product.reviews.all %}
+      <div class="single-review">
+        <strong>{{ review.user.username }}</strong> ({{ review.created_at|date:"M d, Y" }})<br>
+        {{ review.comment }}
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No reviews yet. Be the first to review!</p>
+  {% endif %}
+
+  <div class="review-form mt-3">
+    <form method="POST" action="{% url 'add_review' product.id %}">
+      {% csrf_token %}
+      <textarea name="comment" placeholder="Write your review..." required></textarea>
+      <button type="submit" class="btn btn-bobbin">Submit Review</button>
+    </form>
+  </div>
+</div>
+
+<!-- Size Guide Modal -->
+<div class="modal fade" id="sizeGuideModal" tabindex="-1" aria-labelledby="sizeGuideModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="sizeGuideModalLabel">Size Guide</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <ul>
+          <li><strong>S</strong>: Chest 36-38"</li>
+          <li><strong>M</strong>: Chest 38-40"</li>
+          <li><strong>L</strong>: Chest 40-42"</li>
+          <li><strong>XL</strong>: Chest 42-44"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="popupMessage" class="popup-message"></div>
+
+<!-- Fullscreen Modal -->
+<div id="fullscreenModal" class="fullscreen-modal">
+  <span class="close-btn" id="fullscreenClose">&times;</span>
+  <img id="fullscreenImage" src="">
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* ---------- Image / Thumbnails ---------- */
+const mainImage = document.getElementById('mainImage');
+const verticalThumbnails = document.querySelectorAll('.thumbnail-vertical');
+let images = [];
+verticalThumbnails.forEach(thumb => images.push(thumb.src));
+let currentIndex = 0;
+
+// Thumbnail click
+verticalThumbnails.forEach((thumb, index) => {
+  thumb.addEventListener('click', () => {
+    mainImage.src = thumb.src;
+    verticalThumbnails.forEach(t => t.classList.remove('active'));
+    thumb.classList.add('active');
+    currentIndex = index;
+  });
+});
+
+/* ---------- Fullscreen modal (RESTORED ORIGINAL BEHAVIOR) ---------- */
+const modal = document.getElementById('fullscreenModal');
+const modalImg = document.getElementById('fullscreenImage');
+const closeBtn = document.getElementById('fullscreenClose');
+let zoom = 1;
+
+// Open fullscreen ONLY on main image click
+mainImage.addEventListener('click', () => {
+  modal.style.display = "flex";
+  modalImg.src = mainImage.src;
+  zoom = 1;
+  modalImg.style.transform = `scale(${zoom})`;
+});
+
+// Close fullscreen
+closeBtn.addEventListener('click', () => {
+  modal.style.display = "none";
+});
+
+// Click outside image closes modal
+modal.addEventListener('click', (e) => {
+  if(e.target === modal) modal.style.display = "none";
+});
+
+// Zoom on image click (cycle)
+modalImg.addEventListener('click', () => {
+  zoom += 0.5;
+  if(zoom > 3) zoom = 1;
+  modalImg.style.transform = `scale(${zoom})`;
+});
+
+// Keyboard navigation (left/right) when modal open
+document.addEventListener('keydown', function(e) {
+  if(modal.style.display === "flex") {
+    if(e.key === "ArrowRight") {
+      currentIndex = (currentIndex + 1) % images.length;
+      modalImg.src = images[currentIndex];
+    } else if(e.key === "ArrowLeft") {
+      currentIndex = (currentIndex - 1 + images.length) % images.length;
+      modalImg.src = images[currentIndex];
+    }
+  }
+});
+
+/* ---------- Size selection ---------- */
+const sizeButtons = document.querySelectorAll(".size-btn");
+let selectedSize = null;
+sizeButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    sizeButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    selectedSize = btn.dataset.size;
+  });
+});
+
+/* ---------- Add to Cart (AJAX) ---------- */
+document.getElementById("addToCartBtn").addEventListener("click", function () {
+  const productId = this.dataset.productId;
+  const popup = document.getElementById("popupMessage");
+
+  if (!selectedSize) {
+    popup.textContent = "Please select a size.";
+    popup.style.display = 'block';
+    setTimeout(() => popup.style.display = 'none', 1500);
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("selected_size", selectedSize);
+  formData.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+
+  fetch(`/add-to-cart/${productId}/`, {
+    method: "POST",
+    body: formData,
+    headers: { "X-Requested-With": "XMLHttpRequest" }
+  })
+  .then(res => res.json())
+  .then(data => {
+    popup.textContent = data.message;
+    popup.style.display = 'block';
+    setTimeout(() => popup.style.display = 'none', 1500);
+  })
+  .catch(() => {
+    popup.textContent = "Something went wrong.";
+    popup.style.display = 'block';
+    setTimeout(() => popup.style.display = 'none', 1500);
+  });
+});
+
+/* ---------- Buy Now ---------- */
+document.getElementById("buyNowButton").addEventListener("click", function () {
+  if (!selectedSize) {
+    alert("Please select a size before buying.");
+    return;
+  }
+  const productId = "{{ product.id }}";
+  const form = document.createElement('form');
+  form.method = 'GET';
+  form.action = `/buy-now/${productId}/`;
+  const sizeInput = document.createElement('input');
+  sizeInput.type = 'hidden';
+  sizeInput.name = 'size';
+  sizeInput.value = selectedSize;
+  form.appendChild(sizeInput);
+  document.body.appendChild(form);
+  form.submit();
+});
+
+/* ---------- Wishlist AJAX (uses your toggle_wishlist view) ---------- */
+const wishlistHeart = document.getElementById("wishlistHeart");
+wishlistHeart.addEventListener("click", () => {
+  const productId = wishlistHeart.dataset.productId;
+  const popup = document.getElementById("popupMessage");
+
+  fetch(`/toggle-wishlist/${productId}/`, {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": "{{ csrf_token }}",
+      "X-Requested-With": "XMLHttpRequest"
+    }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'added') {
+      wishlistHeart.classList.add('active');
+      wishlistHeart.querySelector("i").classList.replace("bi-heart", "bi-heart-fill");
+    } else {
+      wishlistHeart.classList.remove('active');
+      wishlistHeart.querySelector("i").classList.replace("bi-heart-fill", "bi-heart");
+    }
+    popup.textContent = data.message;
+    popup.style.display = 'block';
+    setTimeout(() => popup.style.display = 'none', 1500);
+  })
+  .catch(() => {
+    popup.textContent = "Login required or something went wrong.";
+    popup.style.display = 'block';
+    setTimeout(() => popup.style.display = 'none', 1500);
+  });
+});
+
+/* ---------- Share feature (ONLY ADDED PART) ---------- */
+const shareIcon = document.getElementById('shareButton');
+const shareModal = document.getElementById('shareModal');
+const closeShareBtn = document.getElementById('closeShareBtn');
+const shareWhatsApp = document.getElementById('shareWhatsApp');
+const shareInsta = document.getElementById('shareInsta');
+const shareFacebook = document.getElementById('shareFacebook');
+const copyLink = document.getElementById('copyLink');
+const pageUrl = window.location.href;
+
+shareIcon.addEventListener('click', () => {
+  shareModal.classList.add('active');
+  shareModal.setAttribute('aria-hidden', 'false');
+});
+
+closeShareBtn.addEventListener('click', () => {
+  shareModal.classList.remove('active');
+  shareModal.setAttribute('aria-hidden', 'true');
+});
+
+shareWhatsApp.addEventListener('click', () => {
+  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(pageUrl)}`, '_blank');
+});
+
+shareInsta.addEventListener('click', () => {
+  alert("Instagram sharing works via app. Please copy the link to share.");
+});
+
+shareFacebook.addEventListener('click', () => {
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`, '_blank');
+});
+
+copyLink.addEventListener('click', () => {
+  navigator.clipboard.writeText(pageUrl).then(() => {
+    alert('Link copied to clipboard!');
+  });
+});
+</script>
+{% endblock %}

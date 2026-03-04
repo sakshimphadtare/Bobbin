@@ -1,0 +1,1 @@
+web: gunicorn Bobbin_pro.wsgi

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%;">
+{% load static %}
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Bobbin{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+  <style>
+    body { padding-top: 0px; }
+    body:not([data-homepage="true"]) { padding-top: 70px; }
+
+    .btn-bobbin { background-color: rgb(3,59,47); color: #fff; }
+    .btn-bobbin:hover { background-color: rgb(2,40,32); }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1030;
+      transform: translateY(-100%);
+      opacity: 0;
+      transition: all .4s ease;
+      padding: 1.2rem 2rem;
+      background: rgb(3,59,47);
+    }
+    .navbar.visible {
+      transform: translateY(0);
+      opacity: 1;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: .6rem 2rem;
+    }
+    .navbar .nav-link { color: #fff !important; }
+    .navbar .nav-link:hover { color: #ccc !important; }
+
+    .navbar-nav.me-auto { margin-left: 40px; }
+
+    /* Search icon wrapper */
+    .search-icon-wrapper {
+      background: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .search-icon-wrapper .nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-size: 16px;
+      color: #fff !important;
+      background: none !important;
+      border: none !important;
+    }
+
+    #heroBrand {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+      font-size: 4rem;
+      font-family: 'Playfair Display', serif;
+      color: #fff;
+      letter-spacing: 20px;
+      z-index: 1050;
+      transition: all .6s ease;
+    }
+
+    #heroBrand.slide-to-navbar {
+      top: 14px;
+      font-size: 1.8rem;
+      letter-spacing: 4px;
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1031;
+      color: #fff;
+    }
+
+    #heroSubtitle {
+      position: absolute;
+      top: calc(50% + 60px);
+      left: 50%;
+      transform: translate(-50%,-50%);
+      font-size: 1.2rem;
+      font-family: 'Playfair Display', serif;
+      color: #fff;
+      transition: all .6s ease;
+      z-index: 1049;
+    }
+    #heroSubtitle.fade-out {
+      opacity: 0;
+      transform: translate(-50%, -70%);
+    }
+
+    .navbar-slide-item {
+      opacity: 0;
+      transform: translateX(-30px);
+      animation: navbarItemSlide .5s ease forwards;
+    }
+    @keyframes navbarItemSlide {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .hamburger {
+      font-size: 20px;
+      cursor: pointer;
+      color: white;
+      position: fixed;
+      top: 17px;
+      left: 18px;
+      z-index: 1100;
+    }
+
+    .sidebar-custom {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      z-index: 1099;
+      top: 0;
+      left: 0;
+      background-color: rgb(3, 59, 47);
+      overflow-x: hidden;
+      transition: 0.3s;
+      padding-top: 60px;
+    }
+
+    .sidebar-custom a {
+      padding: 10px 25px;
+      text-decoration: none;
+      font-size: 18px;
+      color: white;
+      display: block;
+      transition: 0.2s;
+    }
+
+    .sidebar-custom a:hover {
+      background-color: rgba(255,255,255,0.1);
+    }
+
+    .sidebar-custom .closebtn {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 30px;
+      color: white;
+    }
+
+    #popup-toast-container {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+    }
+    .popup-toast {
+      background-color: white;
+      color: black;
+      border: 1px solid #ccc;
+      padding: 16px 24px;
+      border-radius: 10px;
+      min-width: 280px;
+      max-width: 400px;
+      height: 4cm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      opacity: 0;
+      animation: fadeInOut 2.5s forwards;
+      font-family: 'Helvetica Neue', sans-serif;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      90% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    }
+  </style>
+</head>
+<body style="display:flex;flex-direction:column;min-height:100vh;" {% if request.path == '/' %}data-homepage="true"{% endif %}>
+
+  <span class="hamburger" onclick="openSidebar()">&#9776;</span>
+  <div id="mySidebar" class="sidebar-custom">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeSidebar()">&times;</a>
+    <a href="#">New In</a>
+    <a href="#">My Orders</a>
+    <a href="#">Contact Us</a>
+    <a href="#">About Us</a>
+  </div>
+
+  <nav class="navbar navbar-expand-lg navbar-dark px-4">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExampleDefault">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link navbar-slide-item" style="animation-delay:.2s;" href="{% url 'home' %}"><i class="bi bi-house"></i> Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link navbar-slide-item" style="animation-delay:.4s;" href="{% url 'product_list' %}"><i class="bi bi-shop"></i> Shop Tops</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav mb-2 mb-lg-0 align-items-center">
+
+        <!-- ✅ Removed the locator section -->
+
+        <!-- ✅ Search Icon -->
+        <li class="nav-item me-3 navbar-slide-item search-icon-wrapper" style="animation-delay:.55s;">
+          <a class="nav-link" href="{% url 'search_page' %}">
+            <i class="bi bi-search"></i>
+          </a>
+        </li>
+
+        {% if user.is_authenticated %}
+          <li class="nav-item me-3 navbar-slide-item" style="animation-delay:.8s;"><a class="nav-link" href="{% url 'view_wishlist' %}"><i class="bi bi-heart-fill"></i></a></li>
+          <li class="nav-item me-3 navbar-slide-item" style="animation-delay:1s;"><a class="nav-link" href="{% url 'view_cart' %}"><i class="bi bi-cart3"></i> Cart{% if cart_count > 0 %} <span class="badge bg-danger">{{ cart_count }}</span>{% endif %}</a></li>
+          <li class="nav-item navbar-slide-item" style="animation-delay:1.2s;">
+            <form method="POST" action="{% url 'logout' %}">{% csrf_token %}
+              <button type="submit" class="nav-link btn btn-link text-white p-0 border-0 bg-transparent">Logout ({{ user.email }})</button>
+            </form>
+          </li>
+        {% else %}
+          <li class="nav-item navbar-slide-item" style="animation-delay:.8s;"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
+          <li class="nav-item navbar-slide-item" style="animation-delay:1s;"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+
+  {% if messages %}
+    <div id="popup-toast-container">
+      {% for message in messages %}
+        <div class="popup-toast flash-msg">{{ message }}</div>
+      {% endfor %}
+    </div>
+    <script>
+      setTimeout(() => {
+        document.querySelectorAll('.flash-msg').forEach(el => el.style.display = 'none');
+      }, 500);
+    </script>
+  {% endif %}
+
+  {% if request.path == '/' %}
+    <div id="heroBrand">BOBBIN</div>
+    <div id="heroSubtitle">Discover best Men's top</div>
+  {% elif request.path == '/search/' or request.path == '/products/' or request.path|slice:":7" == "/style/" or request.path == '/register/' or request.path == '/login/' or request.path == '/cart/' or request.path == '/wishlist/' %}
+    <div id="heroBrand" class="slide-to-navbar">BOBBIN</div>
+  {% endif %}
+
+  <main style="flex:1;" id="productContent">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer mt-auto text-white pt-5 pb-3" style="background-color: rgb(3,59,47);">
+    <div class="container text-start">
+      <div class="row">
+        <div class="col-md-3 col-sm-6 mb-4">
+          <h6 class="text-uppercase fw-bold mb-3">Contact Us</h6>
+          <ul class="list-unstyled">
+            <li>
+              <a href="https://mail.google.com/mail/?view=cm&to=support@bobbin.in" target="_blank" class="text-white text-decoration-none">
+                support@bobbin.in
+              </a>
+            </li>
+            <li>Phone: +91 98765 43210</li>
+            <li>Mon–Fri: 10am – 6pm</li>
+          </ul>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-4">
+          <h6 class="text-uppercase fw-bold mb-3">About Us</h6>
+          <ul class="list-unstyled">
+            <li><a href="#" class="text-white text-decoration-none">Our Story</a></li>
+            <li><a href="#" class="text-white text-decoration-none">Careers</a></li>
+            <li><a href="#" class="text-white text-decoration-none">Press</a></li>
+          </ul>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-4">
+          <h6 class="text-uppercase fw-bold mb-3">FAQs</h6>
+          <ul class="list-unstyled">
+            <li><a href="#" class="text-white text-decoration-none">Shipping</a></li>
+            <li><a href="#" class="text-white text-decoration-none">Returns</a></li>
+            <li><a href="#" class="text-white text-decoration-none">Order Tracking</a></li>
+          </ul>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-4">
+          <h6 class="text-uppercase fw-bold mb-3">Bobbin Services</h6>
+          <ul class="list-unstyled">
+            <li><a href="#" class="text-white text-decoration-none">Gift Cards</a></li>
+            <li><a href="#" class="text-white text-decoration-none">Style Guide</a></li>
+            <li><a href="#" class="text-white text-decoration-none">Store Locator</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="text-center mt-3">
+        <p class="mb-0">© 2025 Bobbin. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function openSidebar() {
+      document.getElementById("mySidebar").style.width = "250px";
+    }
+    function closeSidebar() {
+      document.getElementById("mySidebar").style.width = "0";
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const navbar = document.querySelector(".navbar");
+      const heroBrand = document.getElementById("heroBrand");
+      const heroSubtitle = document.getElementById("heroSubtitle");
+
+      if (window.location.pathname === '/') {
+        window.addEventListener("scroll", () => {
+          if (window.scrollY > 5) {
+            navbar.classList.add("visible");
+            heroBrand?.classList.add("slide-to-navbar");
+            heroSubtitle?.classList.add("fade-out");
+          } else {
+            navbar.classList.remove("visible");
+            heroBrand?.classList.remove("slide-to-navbar");
+            heroSubtitle?.classList.remove("fade-out");
+          }
+        });
+      } else {
+        navbar.classList.add("visible");
+      }
+    });
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

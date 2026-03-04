@@ -1,0 +1,358 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}All Products{% endblock %}
+
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+  body, html {margin:0;padding:0;overflow-x:hidden;}
+  .carousel-inner {border-radius:16px;overflow:hidden;}
+  .carousel-item img {width:100%;height:70vh;object-fit:cover;border-radius:16px;box-shadow:0 8px 20px rgba(0,0,0,0.3);}
+  .carousel-fade .carousel-item {opacity:0;transition:opacity 1s ease-in-out;}
+  .carousel-fade .carousel-item.active {opacity:1;}
+  .carousel-indicators [data-bs-target]{background-color:#fff;width:10px;height:10px;border-radius:50%;margin:0 6px;opacity:0.5;transition:opacity 0.3s ease;}
+  .carousel-indicators .active{opacity:1;}
+  .carousel-caption{background:rgba(0,0,0,0.4);border-radius:8px;padding:10px 20px;font-family:'Playfair Display',serif;font-size:1.1rem;}
+  .carousel-overlay-controls{position:absolute;top:50px;left:0;width:100%;z-index:5;padding:12px 20px;display:flex;flex-direction:column;gap:10px;}
+  .location-display{display:inline-flex;align-items:center;gap:8px;background-color:transparent;color:white;padding:10px 18px;border-radius:0;font-weight:500;font-size:14px;cursor:pointer;}
+  .location-display i{font-size:16px;}
+  .search-bar{width:100%;position:relative;}
+  .search-bar input{background:transparent;color:white;border-radius:0;padding:12px 20px;width:100%;border:1px solid white;outline:none;}
+  .search-bar input::placeholder{color:#ddd;}
+  .bi-search{color:white!important;}
+  .search-suggestions{position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;z-index:10;list-style:none;margin:0;padding:0;border-radius:4px;max-height:200px;overflow-y:auto;color:black;}
+  .search-suggestions li{padding:8px 16px;cursor:pointer;}
+  .search-suggestions li:hover{background-color:#f2f2f2;}
+  .pincode-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:20px 25px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);z-index:9999;display:none;width:90%;max-width:400px;}
+  .modal-title{font-weight:bold;font-size:16px;margin-bottom:10px;}
+  .modal-input{width:100%;padding:10px;margin-bottom:12px;border:1px solid #ccc;border-radius:6px;}
+  .address-item{padding:8px;border-bottom:1px solid #eee;cursor:pointer;display:flex;align-items:center;gap:8px;}
+  .address-item:hover{background:#f8f8f8;}
+  .btn-bobbin{background-color:rgb(3,59,47);color:white;border:none;padding:8px 18px;border-radius:6px;cursor:pointer;}
+  .category-buttons{margin:20px auto;text-align:center;display:flex;justify-content:center;flex-wrap:wrap;gap:12px;}
+  .filter-btn{padding:8px 16px;border:1px solid #333;border-radius:4px;background:none;color:#333;cursor:pointer;transition:background 0.3s;font-size:14px;}
+  .filter-btn:hover{background:#f2f2f2;}
+  .filter-btn.active{background:rgb(3,59,47);color:white;border-color:rgb(3,59,47);}
+  .gucci-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;width:100vw;padding:0;margin:0;}
+  .gucci-card{position:relative;opacity:0;transform:translateY(20px);transition:opacity 0.5s ease,transform 0.5s ease;overflow:hidden;}
+  .gucci-card.appear{opacity:1;transform:translateY(0);}
+  .gucci-card img{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;transition:transform 0.4s ease;display:block;}
+  .gucci-card:hover img{transform:scale(1.03);}
+  .wish{position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.85);padding:8px;border-radius:50%;z-index:2;transition:background 0.3s;border:none;}
+  .wish:hover{background:rgba(255,255,255,1);}
+  .wish i.bi-heart{color:black;}
+  .wish i.bi-heart-fill{color:red!important;}
+  .overlay{position:absolute;bottom:0;width:100%;padding:12px;background:rgba(0,0,0,0.6);color:white;opacity:0;transition:opacity 0.4s ease;font-family:'Playfair Display',serif;font-size:1rem;text-align:center;}
+  .gucci-card:hover .overlay{opacity:1;}
+  .advanced-filters-container{margin:20px auto;display:flex;justify-content:flex-end;padding-right:20px;}
+  #filterSidebar{position:fixed;top:0;right:-320px;width:300px;height:100%;background:#fff;box-shadow:-2px 0 10px rgba(0,0,0,0.3);z-index:9998;padding:20px;display:flex;flex-direction:column;gap:20px;transition:right 0.3s ease;overflow-y:auto;}
+  #filterSidebar.active{right:0;}
+  #filterOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:9997;display:none;}
+  .filter-header{display:flex;justify-content:space-between;align-items:center;}
+  .close-sidebar{background:none;border:none;font-size:20px;font-weight:bold;cursor:pointer;color:#333;}
+  .filter-group{display:flex;flex-wrap:wrap;gap:10px;}
+  .filter-option{padding:8px 12px;background:#f2f2f2;border-radius:6px;cursor:pointer;font-size:14px;border:1px solid #ccc;user-select:none;}
+  .filter-option.active{background:rgb(3,59,47);color:#fff;border-color:rgb(3,59,47);}
+  .apply-btn{margin-top:auto;padding:10px;background:rgb(3,59,47);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:16px;font-weight:500;}
+  #feedbackToast{
+    position:fixed;
+    bottom:30px;
+    right:30px;
+    background:rgba(0,0,0,0.85);
+    color:#fff;
+    padding:12px 18px;
+    border-radius:6px;
+    font-size:14px;
+    z-index:99999;
+    display:none;
+    animation:fadeInOut 3s forwards;
+  }
+  @keyframes fadeInOut {
+    0% {opacity:0;transform:translateY(20px);}
+    10% {opacity:1;transform:translateY(0);}
+    80% {opacity:1;transform:translateY(0);}
+    100% {opacity:0;transform:translateY(20px);}
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="3000" data-bs-wrap="true">
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="3"></button>
+    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="4"></button>
+  </div>
+
+  <div class="carousel-overlay-controls">
+    <div class="location-display" onclick="openModal()">
+      <i class="bi bi-geo-alt-fill"></i>
+      <span id="selectedLocation">Enter Pincode</span>
+      <i class="bi bi-chevron-down"></i>
+    </div>
+    <form method="GET" action="{% url 'search_page' %}" class="search-bar">
+      <input type="text" name="q" class="searchInput" placeholder="Search 'shirts', 'linen', etc..." autocomplete="off" required>
+      <ul class="search-suggestions" style="display:none;"></ul>
+    </form>
+  </div>
+
+  <div class="carousel-inner">
+    <div class="carousel-item active"><img src="{% static 'images/BANNER1.jpg' %}" alt=""></div>
+    <div class="carousel-item"><img src="{% static 'images/BANNER5.jpg' %}" alt=""></div>
+    <div class="carousel-item"><img src="{% static 'images/BANNER3.jpg' %}" alt=""></div>
+    <div class="carousel-item"><img src="{% static 'images/BANNER6.jpg' %}" alt=""></div>
+    <div class="carousel-item"><img src="{% static 'images/BANNER_OVERSHIRTS.jpg' %}" alt=""></div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+  <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+</div>
+
+<div class="category-buttons">
+  <button class="filter-btn active" data-filter="All">All</button>
+  <button class="filter-btn" data-filter="Casual">Casual</button>
+  <button class="filter-btn" data-filter="Printed">Printed</button>
+  <button class="filter-btn" data-filter="Formal">Formal</button>
+  <button class="filter-btn" data-filter="Checked">Checked</button>
+  <button class="filter-btn" data-filter="Striped">Striped</button>
+  <button class="filter-btn" data-filter="Solid">Solid</button>
+  <button class="filter-btn" data-filter="Denim">Denim</button>
+  <button class="filter-btn" data-filter="Cuban">Cuban</button>
+  <button class="filter-btn" data-filter="Half Sleeve">Half Sleeve</button>
+  <button class="filter-btn" data-filter="Full Sleeve">Full Sleeve</button>
+</div>
+
+<div class="advanced-filters-container">
+  <button id="filterToggle" class="btn-bobbin" style="display:flex;align-items:center;gap:6px;">
+    <i class="bi bi-sliders"></i>
+  </button>
+</div>
+
+<div id="filterSidebar">
+  <div class="filter-header">
+    <h4 style="margin:0;">Filters</h4>
+    <button class="close-sidebar" id="closeSidebar">&times;</button>
+  </div>
+  <h5>Fabric</h5>
+  <div class="filter-group" id="fabricGroup">
+    <div class="filter-option" data-value="">All</div>
+    <div class="filter-option" data-value="cotton">Cotton</div>
+    <div class="filter-option" data-value="linen">Linen</div>
+    <div class="filter-option" data-value="denim">Denim</div>
+    <div class="filter-option" data-value="flannel">Flannel</div>
+    <div class="filter-option" data-value="polyester">Polyester</div>
+    <div class="filter-option" data-value="rayon / viscose">Rayon / Viscose</div>
+    <div class="filter-option" data-value="blends">Blends</div>
+    <div class="filter-option" data-value="silk">Silk</div>
+  </div>
+  <h5>Size</h5>
+  <div class="filter-group" id="sizeGroup">
+    <div class="filter-option" data-value="">All</div>
+    <div class="filter-option" data-value="XS">XS</div>
+    <div class="filter-option" data-value="S">S</div>
+    <div class="filter-option" data-value="M">M</div>
+    <div class="filter-option" data-value="L">L</div>
+    <div class="filter-option" data-value="XL">XL</div>
+    <div class="filter-option" data-value="XXL">XXL</div>
+  </div>
+  <h5>Sort by Price</h5>
+  <div class="filter-group" id="priceGroup">
+    <div class="filter-option" data-value="">None</div>
+    <div class="filter-option" data-value="low-high">Low → High</div>
+    <div class="filter-option" data-value="high-low">High → Low</div>
+  </div>
+  <button class="apply-btn" id="applyFilters">Apply</button>
+</div>
+
+<div id="filterOverlay"></div>
+
+<div class="pincode-modal" id="pincodeModal">
+  <div class="modal-title">Enter Pincode</div>
+  <input type="text" class="modal-input" id="pincodeInput" placeholder="Enter Pincode">
+  <button class="btn-bobbin" onclick="fetchAddresses()">Search</button>
+  <ul id="addressList" style="margin-top:10px;padding:0;list-style:none;"></ul>
+</div>
+
+<div class="gucci-grid mt-5" id="productGrid">
+  {% for product in products %}
+  <div class="gucci-card appear"
+       data-style="{{ product.category|default:''|lower }}"
+       data-fabric="{{ product.material|default:''|lower }}"
+       data-size="{{ product.size|default:''|upper }}"
+       data-price="{{ product.price }}">
+    <button class="wish" data-url="{% url 'toggle_wishlist' product.id %}" data-product="{{ product.id }}">
+      <i class="bi bi-heart{% if product.id in wishlist_products %}-fill{% endif %}"></i>
+    </button>
+
+    <a href="{% url 'product_detail' product.id %}">
+      {% if product.image1 %}
+        <img src="{{ product.image1.url }}" alt="{{ product.name }}">
+      {% else %}
+        <img src="{% static 'images/no-image.png' %}" alt="No image">
+      {% endif %}
+      <div class="overlay">{{ product.name }}</div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+<div id="feedbackToast"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + "=")) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+
+// Pincode modal
+function openModal(){document.getElementById('pincodeModal').style.display='block';}
+function closeModal(){document.getElementById('pincodeModal').style.display='none';}
+document.addEventListener('click', e => {
+  const modal = document.getElementById('pincodeModal');
+  if(modal.style.display==='block' && !modal.contains(e.target) && !e.target.closest('.location-display')){
+    closeModal();
+  }
+});
+
+function fetchAddresses(){
+  const pin=document.getElementById('pincodeInput').value.trim();
+  const list=document.getElementById('addressList');
+  list.innerHTML='';
+  if(!pin){alert('Enter a pincode');return;}
+  list.innerHTML='<li>Loading...</li>';
+
+  fetch(`https://api.postalpincode.in/pincode/${pin}`)
+    .then(res=>res.json())
+    .then(data=>{
+      list.innerHTML='';
+      if(data && data[0] && data[0].Status === "Success" && data[0].PostOffice){
+        data[0].PostOffice.forEach(off=>{
+          const li=document.createElement('li');
+          li.className='address-item';
+          const radio=document.createElement('input');
+          radio.type='radio';
+          radio.name='addressChoice';
+          radio.value=`${off.Name}, ${off.Division}, ${off.District}, ${off.State}`;
+          const label=document.createElement('label');
+          label.textContent=radio.value;
+          label.style.cursor="pointer";
+          li.appendChild(radio);
+          li.appendChild(label);
+          list.appendChild(li);
+
+          radio.addEventListener('change',()=>{
+            if(!document.getElementById('enterAddressBtn')){
+              const enterBtn=document.createElement('button');
+              enterBtn.id='enterAddressBtn';
+              enterBtn.textContent='Enter';
+              enterBtn.className='btn-bobbin';
+              enterBtn.style.marginTop='12px';
+              enterBtn.onclick=()=>{
+                const selected=document.querySelector('input[name="addressChoice"]:checked');
+                if(selected){
+                  document.getElementById('selectedLocation').textContent=selected.value;
+                  closeModal();
+                }
+              };
+              list.appendChild(enterBtn);
+            }
+          });
+        });
+      } else {
+        list.innerHTML='<li>No results found</li>';
+      }
+    })
+    .catch(err=>{list.innerHTML='<li>Error fetching data</li>';console.error(err);});
+}
+
+// Wishlist toggle
+document.querySelectorAll('.wish').forEach(btn=>{
+  btn.addEventListener('click', e=>{
+    e.preventDefault();
+    if(!isAuthenticated){showToast('Login to add to wishlist');return;}
+    const url=btn.dataset.url;
+    fetch(url,{method:'POST',headers:{'X-CSRFToken':getCookie('csrftoken')}})
+      .then(res=>res.json())
+      .then(data=>{
+        const icon=btn.querySelector('i');
+        if(data.status==='added'){icon.className='bi bi-heart-fill';showToast('Added to wishlist');}
+        else if(data.status==='removed'){icon.className='bi bi-heart';showToast('Removed from wishlist');}
+      })
+      .catch(err=>console.error(err));
+  });
+});
+
+// Filter sidebar toggle
+const filterSidebar=document.getElementById('filterSidebar');
+const filterOverlay=document.getElementById('filterOverlay');
+document.getElementById('filterToggle').addEventListener('click',()=>{filterSidebar.classList.add('active');filterOverlay.style.display='block';});
+document.getElementById('closeSidebar').addEventListener('click',()=>{filterSidebar.classList.remove('active');filterOverlay.style.display='none';});
+filterOverlay.addEventListener('click',()=>{filterSidebar.classList.remove('active');filterOverlay.style.display='none';});
+
+// Filter selection
+document.querySelectorAll('.filter-option').forEach(opt=>{
+  opt.addEventListener('click',()=>{opt.classList.toggle('active');});
+});
+
+// Category buttons filter
+const productGrid=document.getElementById('productGrid');
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const style=btn.dataset.filter.toLowerCase();
+    document.querySelectorAll('.gucci-card').forEach(card=>{
+      if(style==='all'){card.style.display='block';card.classList.add('appear');}
+      else card.style.display=(card.dataset.style===style)?'block':'none';
+    });
+  });
+});
+
+// Apply advanced filters
+document.getElementById('applyFilters').addEventListener('click',()=>{
+  const selectedFabrics=[...document.querySelectorAll('#fabricGroup .filter-option.active')].map(e=>e.dataset.value.toLowerCase());
+  const selectedSizes=[...document.querySelectorAll('#sizeGroup .filter-option.active')].map(e=>e.dataset.value.toUpperCase());
+  const priceSort=[...document.querySelectorAll('#priceGroup .filter-option.active')].map(e=>e.dataset.value)[0]||'';
+  
+  document.querySelectorAll('.gucci-card').forEach(card=>{
+    let show=true;
+    if(selectedFabrics.length && !selectedFabrics.includes('') && !selectedFabrics.includes(card.dataset.fabric.toLowerCase())) show=false;
+    if(selectedSizes.length && !selectedSizes.includes('') && !selectedSizes.includes(card.dataset.size.toUpperCase())) show=false;
+    card.style.display=show?'block':'none';
+  });
+  
+  if(priceSort==='low-high'){
+    [...productGrid.children].sort((a,b)=>parseFloat(a.dataset.price)-parseFloat(b.dataset.price)).forEach(c=>productGrid.appendChild(c));
+  } else if(priceSort==='high-low'){
+    [...productGrid.children].sort((a,b)=>parseFloat(b.dataset.price)-parseFloat(a.dataset.price)).forEach(c=>productGrid.appendChild(c));
+  }
+  
+  filterSidebar.classList.remove('active');
+  filterOverlay.style.display='none';
+});
+
+// Toast function
+function showToast(msg){
+  const toast=document.getElementById('feedbackToast');
+  toast.textContent=msg;
+  toast.style.display='block';
+  setTimeout(()=>{toast.style.display='none';},1500);
+}
+</script>
+{% endblock %}

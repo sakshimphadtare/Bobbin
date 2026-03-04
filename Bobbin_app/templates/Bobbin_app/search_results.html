@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Search Results - Bobbin{% endblock %}
+
+{% block extra_head %}
+<style>
+  .gucci-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    width: 100vw;
+    padding: 0;
+    margin: 0;
+  }
+
+  .gucci-card {
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    overflow: hidden;
+  }
+
+  .gucci-card img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4/5;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+    display: block;
+  }
+
+  .gucci-card:hover img {
+    transform: scale(1.03);
+  }
+
+  .wish {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255,255,255,0.85);
+    padding: 8px;
+    border-radius: 50%;
+    z-index: 2;
+    transition: background 0.3s;
+    border: none;
+  }
+
+  .wish:hover {
+    background: rgba(255,255,255,1);
+  }
+
+  .wish i.bi-heart {
+    color: black;
+  }
+
+  .wish i.bi-heart-fill {
+    color: red !important;
+  }
+
+  .overlay {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 12px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .gucci-card:hover .overlay {
+    opacity: 1;
+  }
+
+  .appear {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+
+  .search-bar-wrapper {
+    margin-top: 100px;
+    margin-bottom: 20px;
+  }
+
+  #popup-toast-container {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* optional: to not block clicks */
+}
+
+
+  .popup-toast {
+  background-color: white;
+  color: black;
+  font-size: 14px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  animation: fadeInOut 0.9s ease-in-out forwards;
+  width: 4cm;       /* or 151px */
+  height: 2px;      /* or 38px */
+  line-height: 1cm; /* or 38px */
+  padding: 0;
+  box-sizing: border-box;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+  @keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(10px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(10px); }
+  }
+</style>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+{% endblock %}
+
+{% block content %}
+<div class="container search-bar-wrapper d-flex justify-content-center">
+  <form method="GET" action="{% url 'search_page' %}" class="w-75">
+    <div class="input-group">
+      <input type="text" id="searchInput" name="q" class="form-control" placeholder="Search products..." value="{{ query|default:'' }}" required>
+      <button class="btn btn-bobbin" type="submit"><i class="bi bi-search"></i></button>
+    </div>
+  </form>
+</div>
+
+<!-- ✅ Toast container -->
+<div id="popup-toast-container"></div>
+
+{% if query %}
+  <h4 class="mb-4 text-center">Results for: "{{ query }}"</h4>
+{% endif %}
+
+{% if products %}
+  <div class="gucci-grid">
+    {% for product in products %}
+      <div class="gucci-card">
+        {% if user.is_authenticated %}
+          <button class="wish toggle-wishlist-btn"
+                  data-product-id="{{ product.id }}"
+                  data-is-in-wishlist="{% if product.id in wishlist_products %}1{% else %}0{% endif %}">
+            <i class="bi bi-heart{% if product.id in wishlist_products %}-fill{% endif %}"></i>
+          </button>
+        {% endif %}
+        <a href="{% url 'product_detail' product.id %}">
+          {% if product.image1 %}
+            <img src="{{ product.image1.url }}" alt="{{ product.name }}">
+          {% else %}
+            <img src="{% static 'images/no-image.png' %}" alt="No image">
+          {% endif %}
+          <div class="overlay">{{ product.name }}</div>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="text-center text-muted">No products found matching your query.</p>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<script>
+  $(function () {
+    $("#searchInput").autocomplete({
+      source: "{% url 'search_suggestions' %}",
+      minLength: 1
+    });
+
+    $('.gucci-card').each(function (i) {
+      const card = $(this);
+      setTimeout(() => card.addClass('appear'), i * 50);
+    });
+
+    $('.toggle-wishlist-btn').on('click', function (e) {
+      e.preventDefault();
+
+      const btn = $(this);
+      const productId = btn.data('product-id');
+      const isInWishlist = btn.data('is-in-wishlist') === 1;
+      const icon = btn.find('i');
+
+      fetch(`/toggle-wishlist/${productId}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          icon.toggleClass('bi-heart bi-heart-fill');
+          btn.data('is-in-wishlist', isInWishlist ? 0 : 1);
+          showPopupToast(isInWishlist ? 'Removed from Wishlist' : 'Added to Wishlist');
+        }
+      });
+    });
+
+    function showPopupToast(message) {
+      const container = document.getElementById('popup-toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'popup-toast';
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 500);
+    }
+  });
+</script>
+{% endblock %}

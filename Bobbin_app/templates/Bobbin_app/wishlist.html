@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Your Wishlist - Bobbin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h3 class="mb-4">Your Wishlist</h3>
+
+  {% if wishlist_items %}
+    <div class="row">
+      {% for item in wishlist_items %}
+        <div class="col-md-3 mb-4">
+          <a href="{% url 'product_detail' item.product.id %}" style="text-decoration:none;">
+            <img src="{{ item.product.image.url }}" class="img-fluid mb-2" alt="{{ item.product.name }}">
+            <h6 class="text-dark">{{ item.product.name }}</h6>
+            <p class="text-muted">₹{{ item.product.price }}</p>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>You have no items in your wishlist yet.</p>
+  {% endif %}
+</div>
+{% endblock %}
