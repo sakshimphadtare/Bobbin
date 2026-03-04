@@ -18,9 +18,7 @@ def test_base_template(request):
     return render(request, 'base.html')
 
 def home_view(request):
-    context = {'page_title': 'Welcome to Bobbin!'}
-    return render(request, 'index.html', context)
-
+    return render(request, "Bobbin_app/home.html")
 # ------------------ Search -------------------
 
 def search_suggestions(request):
