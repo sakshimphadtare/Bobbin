@@ -17,13 +17,14 @@ SECRET_KEY = os.environ.get(
     "django-insecure-change-this-in-production"
 )
 
-DEBUG = os.environ.get("DEBUG", "True") == "True"
+# DEBUG = os.environ.get("DEBUG", "True") == "True"
+DEBUG = False
 
-ALLOWED_HOSTS = os.environ.get(
-    "ALLOWED_HOSTS",
-    "*"
-).split(",")
-
+ALLOWED_HOSTS = [
+    "bobbin.onrender.com",
+    "localhost",
+    "127.0.0.1"
+]
 # =========================
 # APPLICATIONS
 # =========================
