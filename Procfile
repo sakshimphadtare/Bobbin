@@ -1,1 +1,1 @@
-web: gunicorn Bobbin_pro.wsgi
+web: gunicorn Bobbin_pro.wsgi:application
