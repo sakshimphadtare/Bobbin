@@ -14,40 +14,51 @@
        style="z-index:-1;opacity:0.95;">
 </section>
 
-<!-- 🟢 SIGNATURE PROMISE SECTION -->
+<!-- 🟢 SIGNATURE PROMISE SECTION AS CAROUSEL -->
 <section class="py-5 text-center" style="background:#0f3d2e;color:white;">
   <div class="container">
-
     <h2 class="mb-5" style="font-family:'Playfair Display',serif;">
       Our Signature Promise
     </h2>
 
-    <div class="row g-4">
+    <div id="signaturePromiseCarousel" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-inner text-center py-5">
 
-      <div class="col-md-4">
-        <div class="promise-card">
-          <img src="{% static 'icons/style.png' %}" width="60" class="mb-3" alt="Style">
-          <h5>Handpicked Style</h5>
-          <p>Every design is curated with luxury & timeless fashion.</p>
+        <div class="carousel-item active">
+          <div class="promise-card d-inline-block px-4 py-3">
+            <img src="{% static 'icons/style.png' %}" width="60" class="mb-3" alt="Style">
+            <h5>Handpicked Style</h5>
+            <p>Every design is curated with luxury & timeless fashion.</p>
+          </div>
         </div>
+
+        <div class="carousel-item">
+          <div class="promise-card d-inline-block px-4 py-3">
+            <img src="{% static 'icons/quality.png' %}" width="60" class="mb-3" alt="Quality">
+            <h5>Unmatched Quality</h5>
+            <p>Only premium fabrics and stitching, guaranteed to impress.</p>
+          </div>
+        </div>
+
+        <div class="carousel-item">
+          <div class="promise-card d-inline-block px-4 py-3">
+            <img src="{% static 'icons/delivery.png' %}" width="60" class="mb-3" alt="Delivery">
+            <h5>Express Delivery</h5>
+            <p>Delivered to your door with speed and style.</p>
+          </div>
+        </div>
+
       </div>
 
-      <div class="col-md-4">
-        <div class="promise-card">
-          <img src="{% static 'icons/quality.png' %}" width="60" class="mb-3" alt="Quality">
-          <h5>Unmatched Quality</h5>
-          <p>Only premium fabrics and stitching, guaranteed to impress.</p>
-        </div>
-      </div>
-
-      <div class="col-md-4">
-        <div class="promise-card">
-          <img src="{% static 'icons/delivery.png' %}" width="60" class="mb-3" alt="Delivery">
-          <h5>Express Delivery</h5>
-          <p>Delivered to your door with speed and style.</p>
-        </div>
-      </div>
-
+      <!-- Carousel controls -->
+      <button class="carousel-control-prev" type="button" data-bs-target="#signaturePromiseCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#signaturePromiseCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
     </div>
 
   </div>
@@ -58,11 +69,24 @@
   padding:30px 20px;
   border-radius:12px;
   transition:all 0.35s ease;
+  display: inline-block;
+  text-align: center;
 }
 
 .promise-card:hover{
   transform:translateY(-10px);
   background:rgba(255,255,255,0.08);
+}
+
+.carousel-item {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.carousel-item.active {
+  opacity: 1;
+  transform: translateY(0);
 }
 </style>
 
