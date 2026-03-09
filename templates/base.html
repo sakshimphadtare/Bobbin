@@ -262,6 +262,39 @@
 
   <main style="flex:1;" id="productContent">
     {% block content %}{% endblock %}
+
+    <!-- ✅ Signature Promise Carousel Section -->
+    <section class="py-5" style="background-color: #f8f9fa;">
+      <div class="container">
+        <h3 class="text-center mb-4" style="color: rgb(3,59,47); font-weight: 600;">Our Signature Promise</h3>
+        <div id="signaturePromiseCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+          <div class="carousel-inner text-center">
+            <div class="carousel-item active">
+              <p class="fs-5 fst-italic">"Quality fabrics crafted with care for your perfect fit."</p>
+            </div>
+            <div class="carousel-item">
+              <p class="fs-5 fst-italic">"Exceptional style that lasts through every season."</p>
+            </div>
+            <div class="carousel-item">
+              <p class="fs-5 fst-italic">"Your satisfaction is our top priority, always."</p>
+            </div>
+            <div class="carousel-item">
+              <p class="fs-5 fst-italic">"Handpicked designs to elevate your everyday look."</p>
+            </div>
+          </div>
+
+          <!-- Carousel controls -->
+          <button class="carousel-control-prev" type="button" data-bs-target="#signaturePromiseCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true" style="filter: invert(1);"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#signaturePromiseCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true" style="filter: invert(1);"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="footer mt-auto text-white pt-5 pb-3" style="background-color: rgb(3,59,47);">
