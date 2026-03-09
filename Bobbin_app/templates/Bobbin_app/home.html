@@ -14,81 +14,106 @@
        style="z-index:-1;opacity:0.95;">
 </section>
 
-<!-- 🟢 SIGNATURE PROMISE SECTION AS CAROUSEL -->
-<section class="py-5 text-center" style="background:#0f3d2e;color:white;">
+<!-- 🟢 SIGNATURE PROMISE SECTION -->
+<section class="py-5 text-center" style="background:#0f3d2e;color:white;margin-top:60px;">
   <div class="container">
     <h2 class="mb-5" style="font-family:'Playfair Display',serif;">
       Our Signature Promise
     </h2>
 
-    <div id="signaturePromiseCarousel" class="carousel slide" data-bs-ride="carousel">
-      <div class="carousel-inner text-center py-5">
+    <div class="row g-4">
 
-        <div class="carousel-item active">
-          <div class="promise-card d-inline-block px-4 py-3">
-            <img src="{% static 'icons/style.png' %}" width="60" class="mb-3" alt="Style">
-            <h5>Handpicked Style</h5>
-            <p>Every design is curated with luxury & timeless fashion.</p>
-          </div>
+      <div class="col-md-4">
+        <div class="promise-card animate-on-scroll" style="animation-delay:0.1s;">
+          <img src="{% static 'icons/style.png' %}" width="60" class="mb-3" alt="Style">
+          <h5>Handpicked Style</h5>
+          <p>Every design is curated with luxury & timeless fashion.</p>
         </div>
-
-        <div class="carousel-item">
-          <div class="promise-card d-inline-block px-4 py-3">
-            <img src="{% static 'icons/quality.png' %}" width="60" class="mb-3" alt="Quality">
-            <h5>Unmatched Quality</h5>
-            <p>Only premium fabrics and stitching, guaranteed to impress.</p>
-          </div>
-        </div>
-
-        <div class="carousel-item">
-          <div class="promise-card d-inline-block px-4 py-3">
-            <img src="{% static 'icons/delivery.png' %}" width="60" class="mb-3" alt="Delivery">
-            <h5>Express Delivery</h5>
-            <p>Delivered to your door with speed and style.</p>
-          </div>
-        </div>
-
       </div>
 
-      <!-- Carousel controls -->
-      <button class="carousel-control-prev" type="button" data-bs-target="#signaturePromiseCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon"></span>
-        <span class="visually-hidden">Previous</span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#signaturePromiseCarousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon"></span>
-        <span class="visually-hidden">Next</span>
-      </button>
-    </div>
+      <div class="col-md-4">
+        <div class="promise-card animate-on-scroll" style="animation-delay:0.3s;">
+          <img src="{% static 'icons/quality.png' %}" width="60" class="mb-3" alt="Quality">
+          <h5>Unmatched Quality</h5>
+          <p>Only premium fabrics and stitching, guaranteed to impress.</p>
+        </div>
+      </div>
 
+      <div class="col-md-4">
+        <div class="promise-card animate-on-scroll" style="animation-delay:0.5s;">
+          <img src="{% static 'icons/delivery.png' %}" width="60" class="mb-3" alt="Delivery">
+          <h5>Express Delivery</h5>
+          <p>Delivered to your door with speed and style.</p>
+        </div>
+      </div>
+
+    </div>
   </div>
 </section>
 
 <style>
+/* Promise card style */
 .promise-card{
   padding:30px 20px;
   border-radius:12px;
-  transition:all 0.35s ease;
-  display: inline-block;
+  transition:all 0.5s ease;
+  background: rgba(255,255,255,0.05);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  opacity: 0;
+  transform: translateY(30px);
   text-align: center;
 }
 
 .promise-card:hover{
-  transform:translateY(-10px);
-  background:rgba(255,255,255,0.08);
+  transform: translateY(-10px);
+  background: rgba(255,255,255,0.1);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.3);
 }
 
-.carousel-item {
+/* Scroll animation */
+.animate-on-scroll {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  transform: translateY(30px);
+  animation-fill-mode: forwards;
 }
 
-.carousel-item.active {
-  opacity: 1;
-  transform: translateY(0);
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const scrollElements = document.querySelectorAll(".animate-on-scroll");
+
+  const elementInView = (el, offset = 100) => {
+    const elementTop = el.getBoundingClientRect().top;
+    return (
+      elementTop <=
+      ((window.innerHeight || document.documentElement.clientHeight) - offset)
+    );
+  };
+
+  const displayScrollElement = (element) => {
+    const delay = element.style.animationDelay || '0s';
+    element.style.animation = `fadeUp 0.8s ease forwards ${delay}`;
+  };
+
+  const handleScrollAnimation = () => {
+    scrollElements.forEach((el) => {
+      if (elementInView(el, 100)) {
+        displayScrollElement(el);
+      }
+    });
+  };
+
+  window.addEventListener("scroll", handleScrollAnimation);
+  handleScrollAnimation(); // trigger on load
+});
+</script>
 
 <!-- 🛍️ SHOP BY STYLE SECTION -->
 <section class="py-5 bg-light">
