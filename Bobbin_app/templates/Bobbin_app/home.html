@@ -6,27 +6,31 @@
 {% block content %}
 
 <!-- 🌟 HERO SECTION -->
-<section class="position-relative text-white" style="min-height: 80vh;">
-  <img src="{% static 'images/hero.jpg' %}" alt="Hero" class="w-100 h-100 position-absolute top-0 start-0 object-fit-cover" style="z-index: -1; opacity: 0.95;">
+<section class="position-relative text-white" style="min-height:80vh;">
+  <img src="{% static 'images/hero.jpg' %}" 
+       alt="Hero"
+       loading="eager"
+       class="w-100 h-100 position-absolute top-0 start-0 object-fit-cover"
+       style="z-index:-1;opacity:0.95;">
 </section>
 
 <!-- 🎞️ CAROUSEL SECTION -->
 <section class="py-5 bg-white">
   <div class="container">
-    <div id="homeCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div id="homeCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="3500">
       
       <div class="carousel-inner">
 
         <div class="carousel-item active">
-          <img src="{% static 'images/carousel1.jpg' %}" class="d-block w-100 rounded-3" alt="Carousel 1">
+          <img src="{% static 'images/carousel1.jpg' %}" loading="lazy" class="d-block w-100 rounded-3" alt="Carousel 1">
         </div>
 
         <div class="carousel-item">
-          <img src="{% static 'images/carousel2.jpg' %}" class="d-block w-100 rounded-3" alt="Carousel 2">
+          <img src="{% static 'images/carousel2.jpg' %}" loading="lazy" class="d-block w-100 rounded-3" alt="Carousel 2">
         </div>
 
         <div class="carousel-item">
-          <img src="{% static 'images/carousel3.jpg' %}" class="d-block w-100 rounded-3" alt="Carousel 3">
+          <img src="{% static 'images/carousel3.jpg' %}" loading="lazy" class="d-block w-100 rounded-3" alt="Carousel 3">
         </div>
 
       </div>
@@ -43,30 +47,43 @@
   </div>
 </section>
 
-<!-- 🔰 SIGNATURE PROMISE QUOTE CAROUSEL -->
-<section class="py-5 text-center" style="background-color:#0f3d2e; color:white;">
+<!-- 🟢 SIGNATURE PROMISE QUOTE CAROUSEL -->
+<section class="py-5 text-center" style="background:#0f3d2e;color:white;">
   <div class="container">
 
-    <h2 class="mb-4" style="font-family: 'Playfair Display', serif;">Our Signature Promise</h2>
+    <h2 class="mb-4" style="font-family:'Playfair Display',serif;">
+      Our Signature Promise
+    </h2>
 
-    <div id="quoteCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div id="quoteCarousel" 
+         class="carousel slide carousel-fade"
+         data-bs-ride="carousel"
+         data-bs-interval="4000">
 
       <div class="carousel-inner">
 
         <div class="carousel-item active">
-          <p class="lead">“Premium fabrics crafted for everyday confidence.”</p>
+          <p class="lead fs-4">
+            “Premium fabrics crafted for everyday confidence.”
+          </p>
         </div>
 
         <div class="carousel-item">
-          <p class="lead">“Minimal design. Maximum impact.”</p>
+          <p class="lead fs-4">
+            “Minimal design. Maximum impact.”
+          </p>
         </div>
 
         <div class="carousel-item">
-          <p class="lead">“Fashion that speaks before you do.”</p>
+          <p class="lead fs-4">
+            “Fashion that speaks before you do.”
+          </p>
         </div>
 
         <div class="carousel-item">
-          <p class="lead">“Designed for men who value elegance.”</p>
+          <p class="lead fs-4">
+            “Designed for men who value elegance.”
+          </p>
         </div>
 
       </div>
@@ -79,13 +96,16 @@
 <!-- 🛍️ SHOP BY STYLE SECTION -->
 <section class="py-5 bg-light">
   <div class="container">
-    <h2 class="mb-4 text-center" style="font-family: 'Playfair Display', serif;">Shop by Style</h2>
+    <h2 class="mb-4 text-center" style="font-family:'Playfair Display',serif;">
+      Shop by Style
+    </h2>
+
     <div class="row row-cols-2 row-cols-md-4 g-4">
 
       <div class="col">
         <a href="{% url 'products_by_style' 'casual' %}" class="text-decoration-none text-dark">
           <div class="card h-100 shadow-sm border-0 rounded-3">
-            <img src="{% static 'images/casual.jpg' %}" class="card-img-top rounded-top-3" alt="Casual">
+            <img src="{% static 'images/casual.jpg' %}" loading="lazy" class="card-img-top rounded-top-3">
             <div class="card-body text-center"><h6 class="fw-bold">Casual</h6></div>
           </div>
         </a>
@@ -94,7 +114,7 @@
       <div class="col">
         <a href="{% url 'products_by_style' 'denim' %}" class="text-decoration-none text-dark">
           <div class="card h-100 shadow-sm border-0 rounded-3">
-            <img src="{% static 'images/denim.jpg' %}" class="card-img-top rounded-top-3" alt="Denim">
+            <img src="{% static 'images/denim.jpg' %}" loading="lazy" class="card-img-top rounded-top-3">
             <div class="card-body text-center"><h6 class="fw-bold">Denim</h6></div>
           </div>
         </a>
@@ -103,7 +123,7 @@
       <div class="col">
         <a href="{% url 'products_by_style' 'formal' %}" class="text-decoration-none text-dark">
           <div class="card h-100 shadow-sm border-0 rounded-3">
-            <img src="{% static 'images/formal.jpg' %}" class="card-img-top rounded-top-3" alt="Formal">
+            <img src="{% static 'images/formal.jpg' %}" loading="lazy" class="card-img-top rounded-top-3">
             <div class="card-body text-center"><h6 class="fw-bold">Formal</h6></div>
           </div>
         </a>
@@ -112,7 +132,7 @@
       <div class="col">
         <a href="{% url 'products_by_style' 'oversized' %}" class="text-decoration-none text-dark">
           <div class="card h-100 shadow-sm border-0 rounded-3">
-            <img src="{% static 'images/oversized.jpg' %}" class="card-img-top rounded-top-3" alt="Oversized">
+            <img src="{% static 'images/oversized.jpg' %}" loading="lazy" class="card-img-top rounded-top-3">
             <div class="card-body text-center"><h6 class="fw-bold">Oversized</h6></div>
           </div>
         </a>
@@ -121,7 +141,7 @@
       <div class="col">
         <a href="{% url 'products_by_style' 'cuban' %}" class="text-decoration-none text-dark">
           <div class="card h-100 shadow-sm border-0 rounded-3">
-            <img src="{% static 'images/cuban.jpg' %}" class="card-img-top rounded-top-3" alt="Cuban">
+            <img src="{% static 'images/cuban.jpg' %}" loading="lazy" class="card-img-top rounded-top-3">
             <div class="card-body text-center"><h6 class="fw-bold">Cuban</h6></div>
           </div>
         </a>
@@ -130,7 +150,7 @@
       <div class="col">
         <a href="{% url 'products_by_style' 'printed' %}" class="text-decoration-none text-dark">
           <div class="card h-100 shadow-sm border-0 rounded-3">
-            <img src="{% static 'images/printed.jpg' %}" class="card-img-top rounded-top-3" alt="Printed">
+            <img src="{% static 'images/printed.jpg' %}" loading="lazy" class="card-img-top rounded-top-3">
             <div class="card-body text-center"><h6 class="fw-bold">Printed</h6></div>
           </div>
         </a>
@@ -139,7 +159,7 @@
       <div class="col">
         <a href="{% url 'products_by_style' 'checked' %}" class="text-decoration-none text-dark">
           <div class="card h-100 shadow-sm border-0 rounded-3">
-            <img src="{% static 'images/checked.jpg' %}" class="card-img-top rounded-top-3" alt="Checked">
+            <img src="{% static 'images/checked.jpg' %}" loading="lazy" class="card-img-top rounded-top-3">
             <div class="card-body text-center"><h6 class="fw-bold">Checked</h6></div>
           </div>
         </a>
@@ -148,7 +168,7 @@
       <div class="col">
         <a href="{% url 'products_by_style' 'half sleeve' %}" class="text-decoration-none text-dark">
           <div class="card h-100 shadow-sm border-0 rounded-3">
-            <img src="{% static 'images/half-sleeve.jpg' %}" class="card-img-top rounded-top-3" alt="Half Sleeve">
+            <img src="{% static 'images/half-sleeve.jpg' %}" loading="lazy" class="card-img-top rounded-top-3">
             <div class="card-body text-center"><h6 class="fw-bold">Half Sleeve</h6></div>
           </div>
         </a>
@@ -161,9 +181,11 @@
 <!-- 🛒 CTA SECTION -->
 <section class="py-5 text-center">
   <div class="container">
-    <h2 class="mb-3" style="font-family: 'Playfair Display', serif;">Step into Sophistication</h2>
+    <h2 class="mb-3" style="font-family:'Playfair Display',serif;">Step into Sophistication</h2>
     <p class="lead">Let your wardrobe speak elegance.</p>
-    <a href="{% url 'product_list' %}" class="btn btn-dark btn-lg mt-3 px-5">Explore Collection</a>
+    <a href="{% url 'product_list' %}" class="btn btn-dark btn-lg mt-3 px-5">
+      Explore Collection
+    </a>
   </div>
 </section>
 
