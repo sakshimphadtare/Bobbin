@@ -18,7 +18,7 @@ SECRET_KEY = os.environ.get(
 )
 
 # DEBUG = os.environ.get("DEBUG", "True") == "True"
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "bobbin.onrender.com",
